@@ -1,5 +1,10 @@
-X = [[1, 0], [1, 1], [1, 2], [1, 3]]
-Y = [0, 1, 2, 3]
+def parseData(data):
+    Y = []
+    X = [[1] for _ in range(len(data))]
+    for i, point in enumerate(data):
+        X[i] += data[i][:-1]
+        Y.append(data[i][-1])
+    return (X, Y)
 
 
 def lm(x, beta):
@@ -45,4 +50,10 @@ def gd(X, Y, epoc, alpha):
     return b
 
 
-print(gd(X, Y, 100, 0.1))
+data = [[1, 1, 1], [2, 2, 2], [3, 3, 3]]
+
+X = parseData(data)[0]
+Y = parseData(data)[1]
+
+
+print(gd(X, Y, 1000, 0.01))
