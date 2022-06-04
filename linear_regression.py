@@ -1,3 +1,7 @@
+import math
+import random
+
+
 def parseData(data):
     Y = []
     X = [[1] for _ in range(len(data))]
@@ -18,22 +22,25 @@ def lm(x, beta):
 
 def mse(X, Y, beta):
     """mean squared error loss function"""
-    n = len(X)
-    error = 0
-    for i in range(n):
-        error += (Y[i] - lm(X[i], beta)) ** 2
-    return error / n
+    m = len(X)
+    se = 0
+    for i in range(m):
+        se += (lm(X[i], beta) - Y[i]) ** 2
+    return se / m
+
+
+def rmse(X, Y, beta):
+    return math.sqrt(mse(X, Y, beta))
 
 
 def mseprime(X, Y, beta, j):
     """partial derivative of mse function with respect to beta[j]"""
-    n = len(X)
-    errorp = 0
+    m = len(X)
+    esp = 0
 
-    for i in range(n):
-        errorp += (Y[i] - lm(X[i], beta)) * X[i][j]
-
-    return (2 / n) * errorp
+    for i in range(m):
+        esp += (lm(X[i], beta) - Y[i]) * X[i][j]
+    return (2 / m) * esp
 
 
 def gd(X, Y, epoc, alpha):
@@ -42,18 +49,36 @@ def gd(X, Y, epoc, alpha):
     temp = [0 for _ in range(n)]
     b = [0 for _ in range(n)]
 
-    for i in range(epoc):
+    for _ in range(epoc):
         for j in range(n):
-            temp[j] = b[j] + alpha * mseprime(X, Y, b, j)
+            temp[j] = b[j] - alpha * mseprime(X, Y, b, j)
         for k in range(n):
             b[k] = temp[k]
     return b
 
 
-data = [[1, 1, 1], [2, 2, 2], [3, 3, 3]]
+def sgd(X, Y, epoc, alpha):
+    """stochastic gradient descent algorithm"""
+    n = len(X[0])
+    temp = [0 for _ in range(n)]
+    b = [0 for _ in range(n)]
+
+    for _ in range(epoc):
+        for j in range(n):
+            r = random.randint(0, len(X) - 1)
+            temp[j] = b[j] - alpha * (lm(X[r], b) - Y[r]) * X[r][j]
+        for k in range(n):
+            b[k] = temp[k]
+    return b
+
+
+data = [[1, 1, 1], [2, 2, 2]]
 
 X = parseData(data)[0]
 Y = parseData(data)[1]
 
 
-print(gd(X, Y, 1000, 0.01))
+print(sgd(X, Y, 100, 0.01))
+print(rmse(X, Y, sgd(X, Y, 100, 0.01)))
+print(gd(X, Y, 100, 0.01))
+print(rmse(X, Y, gd(X, Y, 100, 0.01)))
